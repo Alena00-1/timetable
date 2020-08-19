@@ -37,17 +37,26 @@ class Builder(QObject):
             but.clicked.connect(self.controller.push_button_add_row)
 
     @staticmethod
-    def set_line_edit(table, row):
-        for i in range(2, 4):
-            table.setCellWidget(row, i, QLineEdit(table))
+    def set_line_edit(table, row, data=None):
+        if not data:
+            for i in range(2, 4):
+                table.setCellWidget(row, i, QLineEdit())
+        else:
+            item_1 = QLineEdit()
+            item_2 = QLineEdit()
+            item_1.setText(str(data[0]))
+            item_2.setText(str(data[1]))
+            table.setCellWidget(row, 2, item_1)
+            table.setCellWidget(row, 3, item_2)
 
     @staticmethod
     def set_combo_box(table, row):
         combo_lecturer = QComboBox(table)
-        table.setCellWidget(row, 0, combo_lecturer)
         combo_subject = QComboBox(table)
-        table.setCellWidget(row, 1, combo_subject)
         combo_classroom = QComboBox(table)
+
+        table.setCellWidget(row, 0, combo_lecturer)
+        table.setCellWidget(row, 1, combo_subject)
         table.setCellWidget(row, 4, combo_classroom)
         return combo_lecturer, combo_subject, combo_classroom
 
