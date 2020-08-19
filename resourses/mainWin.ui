@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>950</width>
+    <width>944</width>
     <height>673</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -185,7 +185,7 @@
            <enum>QTabWidget::South</enum>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab_4">
            <attribute name="title">
@@ -195,7 +195,12 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
-               <widget class="QLineEdit" name="edit_group"/>
+               <widget class="QLineEdit" name="edit_group">
+                <property name="styleSheet">
+                 <string notr="true">border: 1px solid gray;
+border-radius: 5px;</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="button_group">
@@ -226,7 +231,12 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QLineEdit" name="edit_lecturer"/>
+               <widget class="QLineEdit" name="edit_lecturer">
+                <property name="styleSheet">
+                 <string notr="true">border: 1px solid gray;
+border-radius: 5px;</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="button_lecturer">
@@ -260,7 +270,12 @@
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
-               <widget class="QLineEdit" name="edit_subject"/>
+               <widget class="QLineEdit" name="edit_subject">
+                <property name="styleSheet">
+                 <string notr="true">border: 1px solid gray;
+border-radius: 5px;</string>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="button_subject">
@@ -295,6 +310,10 @@
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
                <widget class="QLineEdit" name="edit_classroom">
+                <property name="styleSheet">
+                 <string notr="true">border: 1px solid gray;
+border-radius: 5px;</string>
+                </property>
                 <property name="maxLength">
                  <number>999</number>
                 </property>
