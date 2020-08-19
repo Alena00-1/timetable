@@ -153,7 +153,7 @@ class DataBase(object):
             "FOREIGN KEY(ID_subject) REFERENCES subject(ID),"
             "FOREIGN KEY(ID_lecturer) REFERENCES lecturer(ID),"
             "FOREIGN KEY(ID_classroom) REFERENCES classroom(ID),"
-            "UNIQUE ('date_timetable') ON CONFLICT REPLACE);")
+            "UNIQUE ('date_timetable', 'ID_group') ON CONFLICT REPLACE);")
         self.connect.commit()
         cur.close()
 
