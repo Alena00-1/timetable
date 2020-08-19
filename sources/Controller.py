@@ -31,6 +31,9 @@ class Controller(QObject):
         self.builder.set_line_edit(self.mainWin.tableWidget, row)
         self.builder.set_button(self.mainWin.tableWidget, row)
         combo_lecturer, combo_subject, combo_classroom = self.builder.set_combo_box(self.mainWin.tableWidget, row)
+        self.set_combobox(combo_lecturer, combo_subject, combo_classroom)
+
+    def set_combobox(self, combo_lecturer, combo_subject, combo_classroom):
         self.set_lecturer(0, combo_lecturer)
         if combo_lecturer.count() < 1:
             self.mainWin.message_error_lecturer()
@@ -186,6 +189,34 @@ class Controller(QObject):
                 self.mainWin.create_workbook(file)
         else:
             self.mainWin.message_warning_empty_table()
+
+    def push_button_edit(self):
+        self.mainWin.tableWidget.setRowCount(0)
+        date = self.mainWin.dateEdit_2.date().toPyDate()
+        self.mainWin.dateEdit.setDate(date)
+        data = self.connect_DB.find_groups()
+        for i in data:
+            self.builder.set_groups(self.mainWin.tableWidget, i[0])
+            item = self.connect_DB.find_timetable(date, i[0])
+            row = self.mainWin.tableWidget.rowCount()
+            if not item:
+                self.builder.set_button(self.mainWin.tableWidget)
+            for a in item:
+                self.mainWin.tableWidget.insertRow(row)
+                self.builder.set_line_edit(self.mainWin.tableWidget, row, (a[2], a[3]))
+                self.builder.set_button(self.mainWin.tableWidget, row)
+                combo_lecturer, combo_subject, combo_classroom = self.builder.set_combo_box(self.mainWin.tableWidget,
+                                                                                            row)
+                row += 1
+                self.set_combobox(combo_lecturer, combo_subject, combo_classroom)
+                index = combo_lecturer.findText(a[0])
+                combo_lecturer.setCurrentIndex(index)
+                index = combo_subject.findText(a[1])
+                combo_subject.setCurrentIndex(index)
+                index = combo_classroom.findText(str(a[4]))
+                combo_classroom.setCurrentIndex(index)
+                self.builder.set_button(self.mainWin.tableWidget)
+        self.mainWin.tabWidget.setCurrentIndex(0)
 
     def find_ID(self, group, subject, lecturer, classroom):
         ID_group = self.connect_DB.find_ID_groups(group)
