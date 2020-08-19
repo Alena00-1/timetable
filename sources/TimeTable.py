@@ -22,6 +22,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.progressBar.setVisible(False)
         self.progressBar_2.setVisible(False)
         self.export_button.setVisible(False)
+        self.edit_button.setVisible(False)
 
         self.tableWidget.setColumnCount(6)
         self.table_lecturer.setColumnCount(2)
@@ -50,6 +51,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.update_button.clicked.connect(self.controller.push_button_update_table)
         self.pushButton_2.clicked.connect(self.controller.push_button_show_timetable)
         self.export_button.clicked.connect(self.controller.push_button_export)
+        self.edit_button.clicked.connect(self.controller.push_button_edit)
 
         self.controller.push_button_update_table()
         self.dateEdit_2.setDate(datetime.datetime.now())
@@ -87,7 +89,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
     def create_table(self):
         check = self.check_empty_value(self.tableWidget.rowCount())
         if not check:
-            return 
+            return
         self.progressBar.setVisible(True)
         self.progressBar.setMaximum(self.tableWidget.rowCount() - 2)
         self.tableWidget.setEnabled(False)
@@ -183,6 +185,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
 
     def set_table_view(self):
         self.export_button.setVisible(True)
+        self.edit_button.setVisible(True)
         self.tableWidget_2.setRowCount(0)
         self.tableWidget_2.setColumnCount(5)
         self.tableWidget_2.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
