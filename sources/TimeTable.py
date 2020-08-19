@@ -86,38 +86,39 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
 
     def create_table(self):
         check = self.check_empty_value(self.tableWidget.rowCount())
-        if check:
-            self.progressBar.setVisible(True)
-            self.progressBar.setMaximum(self.tableWidget.rowCount() - 2)
-            self.tableWidget.setEnabled(False)
-            self.group_ = self.tableWidget.item(0, 0).text()
-            for i in range(1, self.tableWidget.rowCount() - 1):
-                widget = self.tableWidget.cellWidget(i, 0)
-                if isinstance(widget, QComboBox):
-                    lecturer = widget.currentText()
-                    widget = self.tableWidget.cellWidget(i, 1)
-                    subject = widget.currentText()
-                    widget = self.tableWidget.cellWidget(i, 2)
-                    lesson_number = widget.text().strip()
-                    widget = self.tableWidget.cellWidget(i, 3)
-                    comment = widget.text().strip()
-                    widget = self.tableWidget.cellWidget(i, 4)
-                    classroom = widget.currentText()
-                    group, subject, lecturer, classroom = self.controller.find_ID(self.group_, subject, lecturer,
-                                                                                  classroom)
-                    date = (self.dateEdit.date()).toPyDate()
-                    self.controller.save_row(group, subject, lecturer, classroom, date,
-                                             lesson_number, comment)
-                    self.progressBar.setValue(i)
-                elif isinstance(widget, QPushButton):
-                    self.group_ = self.tableWidget.item(i + 1, 0).text()
-                    self.progressBar.setValue(i)
-                else:
-                    self.progressBar.setValue(i)
-            self.tableWidget.setEnabled(True)
-            self.message_success_save()
-            self.controller.push_button_update_table()
-            self.progressBar.setVisible(False)
+        if not check:
+            return 
+        self.progressBar.setVisible(True)
+        self.progressBar.setMaximum(self.tableWidget.rowCount() - 2)
+        self.tableWidget.setEnabled(False)
+        self.group_ = self.tableWidget.item(0, 0).text()
+        for i in range(1, self.tableWidget.rowCount() - 1):
+            widget = self.tableWidget.cellWidget(i, 0)
+            if isinstance(widget, QComboBox):
+                lecturer = widget.currentText()
+                widget = self.tableWidget.cellWidget(i, 1)
+                subject = widget.currentText()
+                widget = self.tableWidget.cellWidget(i, 2)
+                lesson_number = widget.text().strip()
+                widget = self.tableWidget.cellWidget(i, 3)
+                comment = widget.text().strip()
+                widget = self.tableWidget.cellWidget(i, 4)
+                classroom = widget.currentText()
+                group, subject, lecturer, classroom = self.controller.find_ID(self.group_, subject, lecturer,
+                                                                              classroom)
+                date = (self.dateEdit.date()).toPyDate()
+                self.controller.save_row(group, subject, lecturer, classroom, date,
+                                         lesson_number, comment)
+                self.progressBar.setValue(i)
+            elif isinstance(widget, QPushButton):
+                self.group_ = self.tableWidget.item(i + 1, 0).text()
+                self.progressBar.setValue(i)
+            else:
+                self.progressBar.setValue(i)
+        self.tableWidget.setEnabled(True)
+        self.message_success_save()
+        self.controller.push_button_update_table()
+        self.progressBar.setVisible(False)
 
     def empty_value(self, widget):
         if isinstance(widget, QLineEdit):
@@ -126,12 +127,12 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
             widget.setStyleSheet("QComboBox { border: 1px solid red;}")
 
     def clear_mask(self, widget=None):
-        if widget:
-            widget.setStyleSheet('')
-        else:
+        if not widget:
             edit = [self.edit_lecturer, self.edit_classroom, self.edit_subject, self.edit_group]
             for i in edit:
-                i.setStyleSheet('')
+                i.setStyleSheet('border: 1px solid gray; border-radius: 4px;')
+            return
+        widget.setStyleSheet('')
 
     def check_empty_value(self, row):
         self.timetable = dict()
@@ -139,19 +140,20 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.save = True
         for i in range(1, row):
             combobox_lecturer = self.tableWidget.cellWidget(i, 0)
-            if isinstance(combobox_lecturer, QComboBox):
-                line_edit = self.tableWidget.cellWidget(i, 2)
-                lesson_number = line_edit.text().strip()
-                combobox_classroom = self.tableWidget.cellWidget(i, 4)
-                self.clear_mask(line_edit)
-                self.clear_mask(combobox_lecturer)
-                self.clear_mask(combobox_classroom)
-                if not lesson_number:
-                    self.save = False
-                    self.empty_value(line_edit)
-                else:
-                    self.check_lecturer(combobox_lecturer, lesson_number)
-                    self.check_classroom(combobox_classroom, lesson_number)
+            if not isinstance(combobox_lecturer, QComboBox):
+                continue
+            line_edit = self.tableWidget.cellWidget(i, 2)
+            lesson_number = line_edit.text().strip()
+            combobox_classroom = self.tableWidget.cellWidget(i, 4)
+            self.clear_mask(line_edit)
+            self.clear_mask(combobox_lecturer)
+            self.clear_mask(combobox_classroom)
+            if not lesson_number:
+                self.save = False
+                self.empty_value(line_edit)
+            else:
+                self.check_lecturer(combobox_lecturer, lesson_number)
+                self.check_classroom(combobox_classroom, lesson_number)
         if not self.save:
             self.message_warning_empty_value()
             return False
@@ -159,25 +161,25 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
 
     def check_lecturer(self, combobox_lecturer, lesson_number):
         lecturer = combobox_lecturer.currentText()
-        if lecturer in self.timetable:
-            if lesson_number in self.timetable.get(lecturer):
-                self.save = False
-                self.empty_value(combobox_lecturer)
-            else:
-                self.timetable.update({lecturer: [lesson_number]})
-        else:
+        if lecturer not in self.timetable:
             self.timetable[lecturer] = [lesson_number]
+            return
+        if lesson_number in self.timetable.get(lecturer):
+            self.save = False
+            self.empty_value(combobox_lecturer)
+        else:
+            self.timetable.update({lecturer: [lesson_number]})
 
     def check_classroom(self, combobox_classroom, lesson_number):
         classroom_number = combobox_classroom.currentText()
-        if classroom_number in self.classroom:
-            if lesson_number in self.classroom.get(classroom_number):
-                self.save = False
-                self.empty_value(combobox_classroom)
-            else:
-                self.classroom.update({classroom_number: [lesson_number]})
-        else:
+        if classroom_number not in self.classroom:
             self.classroom[classroom_number] = [lesson_number]
+            return
+        if lesson_number in self.classroom.get(classroom_number):
+            self.save = False
+            self.empty_value(combobox_classroom)
+        else:
+            self.classroom.update({classroom_number: [lesson_number]})
 
     def set_table_view(self):
         self.export_button.setVisible(True)
@@ -192,7 +194,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.tableWidget_2.setDisabled(True)
         self.progressBar_2.setVisible(True)
         self.progressBar_2.setMaximum(self.tableWidget_2.rowCount() * self.tableWidget_2.columnCount())
-        workbook = xlsxwriter.Workbook(file[0])
+        workbook = xlsxwriter.Workbook(file)
         worksheet = workbook.add_worksheet(str(self.dateEdit_2.date().toPyDate()))
         date = workbook.add_format({'num_format': 'dd/mm/yyyy', 'align': 'center'})
         header_format = workbook.add_format({
@@ -239,4 +241,4 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         if f == ('', ''):
             return
         else:
-            return f
+            return f[0]
