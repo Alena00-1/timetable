@@ -30,7 +30,7 @@
        <enum>QTabWidget::Rounded</enum>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -147,6 +147,13 @@
            <widget class="QPushButton" name="export_button">
             <property name="text">
              <string>Выгрузить таблицу</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="edit_button">
+            <property name="text">
+             <string>Редактировать</string>
             </property>
            </widget>
           </item>
@@ -369,6 +376,7 @@ border-radius: 5px;</string>
   <tabstop>dateEdit_2</tabstop>
   <tabstop>pushButton_2</tabstop>
   <tabstop>export_button</tabstop>
+  <tabstop>edit_button</tabstop>
   <tabstop>edit_group</tabstop>
   <tabstop>button_group</tabstop>
   <tabstop>edit_lecturer</tabstop>
