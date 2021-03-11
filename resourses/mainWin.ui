@@ -356,28 +356,6 @@ border-radius: 5px;</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_9">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
-              <item>
-               <widget class="QLineEdit" name="edit_user">
-                <property name="styleSheet">
-                 <string notr="true">border: 1px solid gray;
-border-radius: 5px;</string>
-                </property>
-                <property name="maxLength">
-                 <number>999</number>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="button_user">
-                <property name="text">
-                 <string>Добавить</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item>
              <widget class="QTableWidget" name="table_user">
               <property name="focusPolicy">
                <enum>Qt::NoFocus</enum>

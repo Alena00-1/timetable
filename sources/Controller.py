@@ -152,7 +152,7 @@ class Controller(QObject):
     def push_button_delete_user(self):
         row = self.mainWin.table_user.currentIndex().row()
         login_user = self.mainWin.table_user.item(row, 0)
-        self.connect_DB.delete_from_user(login_user.text())  ### !!!
+        self.connect_DB.delete_from_user(login_user.text())
         self.mainWin.table_user.setRowCount(0)
         self.set_users()
 
@@ -252,6 +252,8 @@ class Controller(QObject):
                 comboBox.addItem(i[0])
                 str_list.append(str(i[0]))
             elif flag_show == 1:
+                self.mainWin.table_subject.setColumnCount(2)
+                self.mainWin.table_subject.setHorizontalHeaderLabels(["Предмет", ''])
                 self.builder.show_table(self.mainWin.table_subject, i[0])
         if comboBox:
             self.builder.search(str_list, comboBox)
@@ -264,6 +266,8 @@ class Controller(QObject):
                 comboBox.addItem(str(i[0]))
                 str_list.append(str(i[0]))
             elif flag_show == 1:
+                self.mainWin.table_classroom.setColumnCount(2)
+                self.mainWin.table_classroom.setHorizontalHeaderLabels(["Номер аудитории", ''])
                 self.builder.show_table(self.mainWin.table_classroom, i[0])
         if comboBox:
             self.builder.search(str_list, comboBox)
@@ -279,6 +283,8 @@ class Controller(QObject):
                 self.builder.set_groups(self.mainWin.tableWidget, i[0])
                 self.builder.set_button(self.mainWin.tableWidget)
             elif flag_show == 1:
+                self.mainWin.table_groups.setColumnCount(2)
+                self.mainWin.table_groups.setHorizontalHeaderLabels(["Группа", ''])
                 self.builder.show_table(self.mainWin.table_groups, i[0])
         return groups
 
@@ -290,12 +296,15 @@ class Controller(QObject):
                 str_list.append(str(i[0]))
                 comboBox.addItem(str(i[0]))
             elif flag_show == 1:
+                self.mainWin.table_lecturer.setColumnCount(2)
+                self.mainWin.table_lecturer.setHorizontalHeaderLabels(["Фамилия И.О.", ''])
                 self.builder.show_table(self.mainWin.table_lecturer, i[0])
         if comboBox:
             self.builder.search(str_list, comboBox)
 
     def set_users(self):
         users = self.connect_DB.find_user()
+        self.mainWin.table_user.setRowCount(0)
         for i in users:
             self.builder.show_table(self.mainWin.table_user, i, 2)
         if self.account:
@@ -310,16 +319,15 @@ class Controller(QObject):
         data = self.connect_DB.find_user(login)
         print("Пользователь:", data)
         if self.authorization.check_login(data, password):
-            print("ВХОД: OK")
+            print("ВХОД: OK\n")
             self.account = data
-            print(self.account)
-            self.mainWin.set_account(login)
+            self.push_button_update_table()
             self.authorization.close()
             if self.status != 1:
                 self.mainWin.settings_for_user()
             self.mainWin.show()
             return
-        print("ВХОД: ERROR")
+        print("ВХОД: ERROR\n")
 
     def push_button_add_user(self):
         login, password = self.authorization.check_empty()
@@ -340,6 +348,7 @@ class Controller(QObject):
         print("login:", login, ",\t pass:", password, "{", key, "}", ",\t status:", 0)
         self.connect_DB.insert_into_user(data)
         self.mainWin.table_user.setRowCount(0)
+        self.account.clear()
         self.set_users()
 
     def exit(self):

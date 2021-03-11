@@ -3,6 +3,7 @@ import os
 import re
 
 from PyQt5.QtWidgets import QDialog
+from PyQt5.QtGui import QIcon
 
 import resourses.authorization as authorization
 
@@ -13,6 +14,7 @@ class Authorization(QDialog, authorization.Ui_Dialog):
         self.setupUi(self)
         self.controller = controller
         self.controller.set_authorization(self)
+        self.setWindowIcon(QIcon('book.png'))
         self.pushButton.clicked.connect(self.controller.push_button_login)
         self.pushButton_2.clicked.connect(self.controller.push_button_add_user)
         self.reset()

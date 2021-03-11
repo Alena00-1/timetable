@@ -105,7 +105,7 @@ class DataBase(object):
         cur = self.connect.cursor()
         cur.execute(
             "CREATE TABLE IF NOT EXISTS users "
-            "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , login TEXT NOT NULL, "
+            "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , login TEXT NOT NULL UNIQUE, "
             "password TEXT NOT NULL, salt TEXT NOT NULL, status INTEGER,"
             "UNIQUE ('login') ON CONFLICT IGNORE);")
         self.connect.commit()

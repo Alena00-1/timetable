@@ -19,6 +19,8 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.exit.triggered.connect(self.controller.exit)
 
     def setup_settings(self):
+        a = QCommonStyle()
+        self.pushButton.setIcon(a.standardIcon(QStyle.SP_ArrowDown))
         self.setWindowIcon(QIcon('book.png'))
         self.tabWidget.setCurrentIndex(0)
         self.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
@@ -79,6 +81,10 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.button_classroom.setVisible(False)
         self.button_subject.setVisible(False)
         self.tabWidget_2.removeTab(4)
+        self.table_groups.setColumnCount(1)
+        self.table_subject.setColumnCount(1)
+        self.table_classroom.setColumnCount(1)
+        self.table_lecturer.setColumnCount(1)
 
     def message_error_lecturer(self):
         QMessageBox.critical(self, 'Внимание!', "Нет доступных преподавателей!")
@@ -289,9 +295,16 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
             return f[0]
 
     def set_account(self, acc):
+        self.tabWidget_2.addTab(self.tab_8, "Пользователи")
+        self.edit_group.setVisible(True)
+        self.edit_subject.setVisible(True)
+        self.edit_classroom.setVisible(True)
+        self.edit_lecturer.setVisible(True)
+        self.button_lecturer.setVisible(True)
+        self.button_group.setVisible(True)
+        self.button_classroom.setVisible(True)
+        self.button_subject.setVisible(True)
         item = self.table_user.findItems(acc, Qt.MatchContains)[0]
         row = self.table_user.row(item)
         buttons = self.table_user.cellWidget(row, 2)
         buttons.setEnabled(False)
-        a = QCommonStyle()
-        self.pushButton.setIcon(a.standardIcon(QStyle.SP_ArrowDown))
