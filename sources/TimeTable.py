@@ -1,8 +1,10 @@
 import datetime
 
 import xlsxwriter
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIntValidator, QIcon
-from PyQt5.QtWidgets import QMainWindow, QHeaderView, QMessageBox, QComboBox, QPushButton, QLineEdit, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QHeaderView, QMessageBox, QComboBox, QPushButton, QLineEdit, QFileDialog, \
+    QCommonStyle, QStyle, QAction
 
 import resourses.mainWin as mainWin
 
@@ -14,6 +16,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.controller = controller
         self.controller.set_timeTable(self)
         self.setup_settings()
+        self.exit.triggered.connect(self.controller.exit)
 
     def setup_settings(self):
         self.setWindowIcon(QIcon('book.png'))
@@ -29,6 +32,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.table_groups.setColumnCount(2)
         self.table_subject.setColumnCount(2)
         self.table_classroom.setColumnCount(2)
+        self.table_user.setColumnCount(3)
 
         self.tableWidget.setHorizontalHeaderLabels(
             ["Преподаватель", "Предмет", 'Пара', 'Примечание', "Аудитория", 'Редактировать'])
@@ -36,12 +40,14 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.table_classroom.setHorizontalHeaderLabels(["Номер аудитории", ''])
         self.table_subject.setHorizontalHeaderLabels(["Предмет", ''])
         self.table_groups.setHorizontalHeaderLabels(["Группа", ''])
+        self.table_user.setHorizontalHeaderLabels(["Логин", "Статус", ""])
 
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_lecturer.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_groups.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_subject.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.table_classroom.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table_user.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         self.button_subject.clicked.connect(self.controller.push_button_add_subject)
         self.button_classroom.clicked.connect(self.controller.push_button_add_classroom)
@@ -58,6 +64,22 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.dateEdit.setDate(datetime.datetime.now())
         self.edit_classroom.setValidator(QIntValidator())
 
+        self.exit = QAction(self)
+        self.exit.setText("Выйти из пользователя")
+        self.exit.setObjectName('exit')
+        self.menuBar.addAction(self.exit)
+
+    def settings_for_user(self):
+        self.edit_group.setVisible(False)
+        self.edit_subject.setVisible(False)
+        self.edit_classroom.setVisible(False)
+        self.edit_lecturer.setVisible(False)
+        self.button_lecturer.setVisible(False)
+        self.button_group.setVisible(False)
+        self.button_classroom.setVisible(False)
+        self.button_subject.setVisible(False)
+        self.tabWidget_2.removeTab(4)
+
     def message_error_lecturer(self):
         QMessageBox.critical(self, 'Внимание!', "Нет доступных преподавателей!")
 
@@ -73,8 +95,9 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
     def message_warning_empty_value(self):
         QMessageBox.warning(self, 'Сохранение не выполнено',
                             "Необходимо проверить и исправить поля отмеченные красным цветом.\n"
-                            "*Если выделено поле 'Преподаватель' - данный преподаватель уже занят на выбранный номер пары.\n"
-                            "*Если выделено поле 'Аудитория' - данная аудитория уже занята на выбранный номер пары.\n"
+                            "*Если выделено поле 'Преподаватель' - данный преподаватель уже занят на выбранный номер пары или его не существует в базе данных.\n"
+                            "*Если выделено поле 'Аудитория' - данная аудитория уже занята на выбранный номер пары или её не существует в базе данных.\n"
+                            "*Если выделено поле 'Предмет' - данного предмета не существует в базе данных.\n"
                             "*Если выделено поле 'Пара' - его необходимо заполнить.")
 
     def message_warning_empty_table(self):
@@ -85,6 +108,9 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
 
     def message_error_save(self):
         QMessageBox.critical(self, 'Ошибка!', "Не удалось сохранить в файл.")
+
+    def message_error_add_user(self):
+        QMessageBox.critical(self, 'Ошибка!', "Пользователь уже существует!")
 
     def create_table(self):
         check = self.check_empty_value(self.tableWidget.rowCount())
@@ -147,15 +173,27 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
             line_edit = self.tableWidget.cellWidget(i, 2)
             lesson_number = line_edit.text().strip()
             combobox_classroom = self.tableWidget.cellWidget(i, 4)
+            combobox_subject = self.tableWidget.cellWidget(i, 1)
             self.clear_mask(line_edit)
             self.clear_mask(combobox_lecturer)
             self.clear_mask(combobox_classroom)
+            self.clear_mask(combobox_subject)
+            text = combobox_lecturer.currentText()
+            if not text or combobox_lecturer.findText(text) == -1:
+                combobox_lecturer.clearEditText()
+            text = combobox_classroom.currentText()
+            if not text or combobox_classroom.findText(text) == -1:
+                combobox_classroom.clearEditText()
+            text = combobox_subject.currentText()
+            if not text or combobox_subject.findText(text) == -1:
+                combobox_subject.clearEditText()
+                self.save = False
+                self.empty_value(combobox_subject)
             if not lesson_number:
                 self.save = False
                 self.empty_value(line_edit)
-            else:
-                self.check_lecturer(combobox_lecturer, lesson_number)
-                self.check_classroom(combobox_classroom, lesson_number)
+            self.check_lecturer(combobox_lecturer, lesson_number)
+            self.check_classroom(combobox_classroom, lesson_number)
         if not self.save:
             self.message_warning_empty_value()
             return False
@@ -163,6 +201,10 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
 
     def check_lecturer(self, combobox_lecturer, lesson_number):
         lecturer = combobox_lecturer.currentText()
+        if not lecturer:
+            self.save = False
+            self.empty_value(combobox_lecturer)
+            return
         if lecturer not in self.timetable:
             self.timetable[lecturer] = [lesson_number]
             return
@@ -245,3 +287,11 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
             return
         else:
             return f[0]
+
+    def set_account(self, acc):
+        item = self.table_user.findItems(acc, Qt.MatchContains)[0]
+        row = self.table_user.row(item)
+        buttons = self.table_user.cellWidget(row, 2)
+        buttons.setEnabled(False)
+        a = QCommonStyle()
+        self.pushButton.setIcon(a.standardIcon(QStyle.SP_ArrowDown))

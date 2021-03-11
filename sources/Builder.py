@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtCore import Qt, QObject, QStringListModel
 from PyQt5.QtGui import QColor, QBrush
-from PyQt5.QtWidgets import QTableWidgetItem, QPushButton, QComboBox, QLineEdit
+from PyQt5.QtWidgets import QTableWidgetItem, QPushButton, QComboBox, QLineEdit, QCompleter
 
 
 class Builder(QObject):
@@ -54,19 +54,26 @@ class Builder(QObject):
         combo_lecturer = QComboBox(table)
         combo_subject = QComboBox(table)
         combo_classroom = QComboBox(table)
+        combo_lecturer.setEditable(True)
+        combo_subject.setEditable(True)
+        combo_classroom.setEditable(True)
 
         table.setCellWidget(row, 0, combo_lecturer)
         table.setCellWidget(row, 1, combo_subject)
         table.setCellWidget(row, 4, combo_classroom)
         return combo_lecturer, combo_subject, combo_classroom
 
-    def show_table(self, table, data):
+    def show_table(self, table, data, column=1):
         table.setRowCount(table.rowCount() + 1)
         but = QPushButton(table)
         but.setText("Удалить")
-        table.setCellWidget(table.rowCount() - 1, 1, but)
+        table.setCellWidget(table.rowCount() - 1, column, but)
         but.clicked.connect(lambda: self.controller.push_button_delete(table))
-        table.setItem(table.rowCount() - 1, 0, QTableWidgetItem(str(data)))
+        if isinstance(data, tuple):
+            table.setItem(table.rowCount() - 1, 0, QTableWidgetItem(str(data[0])))
+            table.setItem(table.rowCount() - 1, 1, QTableWidgetItem(str(data[1])))
+        else:
+            table.setItem(table.rowCount() - 1, 0, QTableWidgetItem(str(data)))
 
     @staticmethod
     def remove_row(table, count):
@@ -79,3 +86,10 @@ class Builder(QObject):
         for i in range(5):
             item = QTableWidgetItem(str(data[i]))
             table.setItem(table.rowCount() - 1, i, item)
+
+    def search(self, str_list, widget):
+        model = QStringListModel()
+        model.setStringList(str_list)
+        completer = QCompleter()
+        completer.setModel(model)
+        widget.setCompleter(completer)

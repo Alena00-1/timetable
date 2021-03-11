@@ -11,6 +11,8 @@ class Controller(QObject):
         self.path = os.getcwd()
         self.connect_DB = DataBase(connect_database(os.path.join(self.path, 'timetable.db')))
         self.set_settings()
+        self.status = int()
+        self.account = list()
 
     def set_timeTable(self, mainWin):
         self.mainWin = mainWin
@@ -18,12 +20,16 @@ class Controller(QObject):
     def set_builder(self, builder):
         self.builder = builder
 
+    def set_authorization(self, authorization):
+        self.authorization = authorization
+
     def set_settings(self):
         self.connect_DB.create_table_subject()
         self.connect_DB.create_table_lecturer()
         self.connect_DB.create_table_classroom()
         self.connect_DB.create_table_groups()
         self.connect_DB.create_table_timetable()
+        self.connect_DB.create_table_users()
 
     def push_button_add_row(self):
         row = self.mainWin.tableWidget.currentIndex().row()
@@ -143,18 +149,26 @@ class Controller(QObject):
         self.set_classroom(1)
         self.set_groups(0)
 
+    def push_button_delete_user(self):
+        row = self.mainWin.table_user.currentIndex().row()
+        login_user = self.mainWin.table_user.item(row, 0)
+        self.connect_DB.delete_from_user(login_user.text())  ### !!!
+        self.mainWin.table_user.setRowCount(0)
+        self.set_users()
+
     def push_button_save(self):
         self.connect_DB.delete_from_timetable((self.mainWin.dateEdit.date()).toPyDate())
         self.mainWin.create_table()
 
     def push_button_update_table(self):
         table = [self.mainWin.table_lecturer, self.mainWin.table_subject, self.mainWin.table_classroom,
-                 self.mainWin.tableWidget, self.mainWin.table_groups]
+                 self.mainWin.table_user, self.mainWin.tableWidget, self.mainWin.table_groups]
         for i in table:
             i.setRowCount(0)
         self.set_lecturer(1)
         self.set_subject(1)
         self.set_classroom(1)
+        self.set_users()
         if self.set_groups(1):
             self.set_groups(0)
             self.mainWin.pushButton.setVisible(True)
@@ -169,8 +183,10 @@ class Controller(QObject):
             self.push_button_delete_group()
         elif table.objectName() == 'table_lecturer':
             self.push_button_delete_lecturer()
-        else:
+        elif table.objectName() == 'table_subject':
             self.push_button_delete_subject()
+        else:
+            self.push_button_delete_user()
 
     def push_button_show_timetable(self):
         date = (self.mainWin.dateEdit_2.date()).toPyDate()
@@ -230,19 +246,27 @@ class Controller(QObject):
 
     def set_subject(self, flag_show, comboBox=None):
         subject = self.connect_DB.find_subject()
+        str_list = list()
         for i in subject:
             if flag_show == 0:
                 comboBox.addItem(i[0])
+                str_list.append(str(i[0]))
             elif flag_show == 1:
                 self.builder.show_table(self.mainWin.table_subject, i[0])
+        if comboBox:
+            self.builder.search(str_list, comboBox)
 
     def set_classroom(self, flag_show, comboBox=None):
         classroom = self.connect_DB.find_classroom()
+        str_list = list()
         for i in classroom:
             if flag_show == 0:
                 comboBox.addItem(str(i[0]))
+                str_list.append(str(i[0]))
             elif flag_show == 1:
                 self.builder.show_table(self.mainWin.table_classroom, i[0])
+        if comboBox:
+            self.builder.search(str_list, comboBox)
 
     def set_groups(self, flag_show=None):
         groups = self.connect_DB.find_groups()
@@ -260,8 +284,64 @@ class Controller(QObject):
 
     def set_lecturer(self, flag_show, comboBox=None):
         snp = self.connect_DB.find_lecturer()
+        str_list = list()
         for i in snp:
             if flag_show == 0:
+                str_list.append(str(i[0]))
                 comboBox.addItem(str(i[0]))
             elif flag_show == 1:
                 self.builder.show_table(self.mainWin.table_lecturer, i[0])
+        if comboBox:
+            self.builder.search(str_list, comboBox)
+
+    def set_users(self):
+        users = self.connect_DB.find_user()
+        for i in users:
+            self.builder.show_table(self.mainWin.table_user, i, 2)
+        if self.account:
+            self.mainWin.set_account(self.account[0][0])
+
+    def push_button_login(self):
+        login, password = self.authorization.check_empty()
+        if not login or not password:
+            return
+
+        print("_____ВХОД_____")
+        data = self.connect_DB.find_user(login)
+        print("Пользователь:", data)
+        if self.authorization.check_login(data, password):
+            print("ВХОД: OK")
+            self.account = data
+            print(self.account)
+            self.mainWin.set_account(login)
+            self.authorization.close()
+            if self.status != 1:
+                self.mainWin.settings_for_user()
+            self.mainWin.show()
+            return
+        print("ВХОД: ERROR")
+
+    def push_button_add_user(self):
+        login, password = self.authorization.check_empty()
+
+        if not login or not password:
+            return
+        if self.connect_DB.find_user(login):
+            self.mainWin.message_error_add_user()
+            return
+
+        print("________ADD USERS_______")
+        salt, key = self.authorization.hash_password(password)
+        data = list()
+        data.append(login)
+        data.append(key)
+        data.append(salt)
+        data.append(0)
+        print("login:", login, ",\t pass:", password, "{", key, "}", ",\t status:", 0)
+        self.connect_DB.insert_into_user(data)
+        self.mainWin.table_user.setRowCount(0)
+        self.set_users()
+
+    def exit(self):
+        self.mainWin.close()
+        self.authorization.show()
