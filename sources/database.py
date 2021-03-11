@@ -101,6 +101,16 @@ class DataBase(object):
         self.connect.commit()
         cursor.close()
 
+    def create_table_users(self):
+        cur = self.connect.cursor()
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS users "
+            "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , login TEXT NOT NULL, "
+            "password TEXT NOT NULL, salt TEXT NOT NULL, status INTEGER,"
+            "UNIQUE ('login') ON CONFLICT IGNORE);")
+        self.connect.commit()
+        cur.close()
+
     def create_table_subject(self):
         cur = self.connect.cursor()
         cur.execute(
@@ -269,3 +279,32 @@ class DataBase(object):
         self.connect.commit()
         cur.close()
         return data
+
+    def find_user(self, user=None):
+        cur = self.connect.cursor()
+        if user:
+            cur.execute('''SELECT login, password, salt, status FROM users WHERE login=?;''',
+                        (user,))
+        else:
+            cur.execute('''SELECT login, status FROM users ORDER BY login ASC;''')
+        data = cur.fetchall()
+        self.connect.commit()
+        cur.close()
+        return data
+
+    def insert_into_user(self, data):
+        cur = self.connect.cursor()
+        cur.execute('''INSERT INTO users (login, password, salt, status) VALUES(?, ?, ?, ?);''',
+                    (data[0], data[1], data[2], int(data[3])))
+        self.connect.commit()
+        cur.close()
+
+    def delete_from_user(self, id):
+        cursor = self.connect.cursor()
+        cursor.execute(
+            '''DELETE FROM users
+            WHERE login = ?
+            ''',
+            (id,))
+        self.connect.commit()
+        cursor.close()
