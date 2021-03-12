@@ -2,7 +2,7 @@ import datetime
 
 import xlsxwriter
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIntValidator, QIcon
+from PyQt5.QtGui import QIntValidator, QIcon, QColor, QBrush
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QMessageBox, QComboBox, QPushButton, QLineEdit, QFileDialog, \
     QCommonStyle, QStyle, QAction
 
@@ -23,6 +23,8 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.pushButton.setIcon(a.standardIcon(QStyle.SP_ArrowDown))
         self.setWindowIcon(QIcon('book.png'))
         self.tabWidget.setCurrentIndex(0)
+        self.tabWidget_2.setCurrentIndex(0)
+        self.tabWidget_2.currentIndex()
         self.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.progressBar.setVisible(False)
         self.progressBar_2.setVisible(False)
@@ -67,7 +69,7 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         self.edit_classroom.setValidator(QIntValidator())
 
         self.exit = QAction(self)
-        self.exit.setText("Выйти из пользователя")
+        self.exit.setText("Сменить пользователя")
         self.exit.setObjectName('exit')
         self.menuBar.addAction(self.exit)
 
@@ -308,3 +310,5 @@ class TimeTable(QMainWindow, mainWin.Ui_MainWindow):
         row = self.table_user.row(item)
         buttons = self.table_user.cellWidget(row, 2)
         buttons.setEnabled(False)
+        self.table_user.item(row, 0).setBackground(QBrush(QColor(240, 240, 240)))
+        self.table_user.item(row, 1).setBackground(QBrush(QColor(240, 240, 240)))

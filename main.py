@@ -14,7 +14,7 @@ def main():
     controller = Controller.Controller()
     Builder.Builder(controller)
     TimeTable.TimeTable(controller)
-    authorization = Authorization.Authorization(controller)
+    authorization = Authorization.Authorization(controller, sys.argv)
     authorization.show()
     app.exec()
 

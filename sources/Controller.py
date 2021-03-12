@@ -161,6 +161,7 @@ class Controller(QObject):
         self.mainWin.create_table()
 
     def push_button_update_table(self):
+        index = self.mainWin.tabWidget_2.currentIndex()
         table = [self.mainWin.table_lecturer, self.mainWin.table_subject, self.mainWin.table_classroom,
                  self.mainWin.table_user, self.mainWin.tableWidget, self.mainWin.table_groups]
         for i in table:
@@ -174,7 +175,10 @@ class Controller(QObject):
             self.mainWin.pushButton.setVisible(True)
         else:
             self.mainWin.pushButton.setVisible(False)
+        if self.status != 1:
+            self.mainWin.settings_for_user()
         self.mainWin.clear_mask()
+        self.mainWin.tabWidget_2.setCurrentIndex(index)
 
     def push_button_delete(self, table):
         if table.objectName() == 'table_classroom':
@@ -344,8 +348,8 @@ class Controller(QObject):
         data.append(login)
         data.append(key)
         data.append(salt)
-        data.append(0)
-        print("login:", login, ",\t pass:", password, "{", key, "}", ",\t status:", 0)
+        data.append(self.status)
+        print("login:", login, ",\t pass:", password, "{", key, "}", ",\t status:", self.status)
         self.connect_DB.insert_into_user(data)
         self.mainWin.table_user.setRowCount(0)
         self.account.clear()
@@ -353,4 +357,6 @@ class Controller(QObject):
 
     def exit(self):
         self.mainWin.close()
+        self.mainWin.tabWidget.setCurrentIndex(0)
+        self.mainWin.tabWidget_2.setCurrentIndex(0)
         self.authorization.show()

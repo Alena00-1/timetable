@@ -9,14 +9,20 @@ import resourses.authorization as authorization
 
 
 class Authorization(QDialog, authorization.Ui_Dialog):
-    def __init__(self, controller):
+    def __init__(self, controller, flag):
         super().__init__()
         self.setupUi(self)
         self.controller = controller
+        if (len(flag) > 1) and (flag[1] == "/admin"):
+            self.controller.status = 1
+        else:
+            self.controller.status = 0
         self.controller.set_authorization(self)
         self.setWindowIcon(QIcon('book.png'))
         self.pushButton.clicked.connect(self.controller.push_button_login)
         self.pushButton_2.clicked.connect(self.controller.push_button_add_user)
+        self.lineEdit_2.textChanged.connect(self.reset_pass)
+        self.lineEdit.textChanged.connect(self.reset_login)
         self.reset()
 
     def check_login(self, data, new_pass):
@@ -24,6 +30,7 @@ class Authorization(QDialog, authorization.Ui_Dialog):
         if not data:
             self.label_4.setVisible(True)
             self.label_4.setText('Неверный логин!')
+
             return False
         key = data[0][1]
         salt = data[0][2]
@@ -34,6 +41,7 @@ class Authorization(QDialog, authorization.Ui_Dialog):
         else:
             self.label_5.setVisible(True)
             self.label_5.setText('Неверный пароль!')
+
             return False
 
     def check_empty(self):
@@ -60,6 +68,14 @@ class Authorization(QDialog, authorization.Ui_Dialog):
         self.label_4.setVisible(False)
         self.label_5.setVisible(False)
         self.label_4.setStyleSheet('color: red')
+        self.label_5.setStyleSheet('color: red')
+
+    def reset_login(self):
+        self.label_4.setVisible(False)
+        self.label_4.setStyleSheet('color: red')
+
+    def reset_pass(self):
+        self.label_5.setVisible(False)
         self.label_5.setStyleSheet('color: red')
 
     def validate_login(self, login):
